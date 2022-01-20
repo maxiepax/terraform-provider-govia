@@ -12,9 +12,9 @@ provider "govia" {
   url      = "https://localhost:8443"
 }
 
-resource "govia_group" "createdgroup" {
-  name        = "lets-test"
-  pool_id     = 2
+resource "govia_group" "group01" {
+  name        = "test-grp"
+  pool_id     = 1
   image_id    = 1
   password    = "VMware1!"
   bootdisk    = "mpx.vmhba1:C0:T0:L0"
@@ -32,6 +32,34 @@ resource "govia_group" "createdgroup" {
   }
 }
 
-output "letstest" {
-  value = resource.govia_group.createdgroup
+output "group01" {
+  value = resource.govia_group.group01
 }
+
+resource "govia_address" "esx01" {
+  ip       = "172.16.100.11"
+  mac      = "aa:bb:cc:11:22:33"
+  hostname = "esx01"
+  domain   = "vmlab.se"
+  reimage  = true
+  pool_id  = resource.govia_group.group01.pool_id
+  group_id = resource.govia_group.group01.id
+}
+
+resource "govia_address" "esx02" {
+  ip       = "172.16.100.13"
+  mac      = "aa:bb:cc:11:22:34"
+  hostname = "esx02"
+  domain   = "vmlab.se"
+  reimage  = true
+  pool_id  = resource.govia_group.group01.pool_id
+  group_id = resource.govia_group.group01.id
+}
+
+output "esx01" {
+  value = resource.govia_address.esx01
+}
+output "esx02" {
+  value = resource.govia_address.esx02
+}
+

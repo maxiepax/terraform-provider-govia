@@ -31,10 +31,10 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"govia_group": resourceGroups(),
+			"govia_group":   resourceGroups(),
+			"govia_address": resourceAddresses(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"govia_tests":  dataSourceTests(),
 			"govia_groups": dataSourceGroups(),
 			"govia_group":  dataSourceGroup(),
 		},
