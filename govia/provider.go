@@ -31,8 +31,9 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"govia_group":   resourceGroups(),
-			"govia_address": resourceAddresses(),
+			"govia_group":   resourceGroup(),
+			"govia_address": resourceAddress(),
+			"govia_pool":    resourcePool(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"govia_groups": dataSourceGroups(),

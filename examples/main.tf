@@ -12,6 +12,15 @@ provider "govia" {
   url      = "https://localhost:8443"
 }
 
+resource "govia_pool" "pool01" {
+  name          = "tf_test_pool"
+  net_address   = "192.168.100.0"
+  start_address = "192.168.10.10"
+  end_address   = "192.168.10.20"
+  netmask       = 24
+  gateway       = "192.168.10.1"
+}
+
 resource "govia_group" "group01" {
   name        = "test-grp"
   pool_id     = 1

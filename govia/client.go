@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 )
@@ -55,9 +56,9 @@ func (c *Client) get(path string, target interface{}) (r *http.Response, err err
 	return
 }
 
-func (c *Client) post(path string, group interface{}, ret interface{}) error {
+func (c *Client) post(path string, item interface{}, ret interface{}) error {
 
-	json_grp, _ := json.Marshal(group)
+	json_grp, _ := json.Marshal(item)
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/%s", c.url, path), bytes.NewReader(json_grp))
 	if err != nil {
 		return err
@@ -72,8 +73,16 @@ func (c *Client) post(path string, group interface{}, ret interface{}) error {
 	}
 	defer r.Body.Close()
 
+	/*
+
+		log.Println("spew")
+		log.Println(spew.Sdump(bodyString))
+	*/
+
 	if r.StatusCode != 200 {
-		return fmt.Errorf("govia returned error: %s", r.Status)
+		bodyBytes, _ := io.ReadAll(r.Body)
+		bodyString := string(bodyBytes)
+		return fmt.Errorf("govia returned error: %s : %s", r.Status, bodyString)
 	}
 
 	err = json.NewDecoder(r.Body).Decode(ret)
@@ -84,8 +93,8 @@ func (c *Client) post(path string, group interface{}, ret interface{}) error {
 	return nil
 }
 
-func (c *Client) patch(path string, group interface{}) error {
-	json_grp, _ := json.Marshal(group)
+func (c *Client) patch(path string, item interface{}) error {
+	json_grp, _ := json.Marshal(item)
 	req, err := http.NewRequest("PATCH", fmt.Sprintf("%s/v1/%s", c.url, path), bytes.NewReader(json_grp))
 	if err != nil {
 		return err
