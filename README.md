@@ -6,8 +6,13 @@ Credits
 
 Massive credits go to one of my best friends, and mentor [Jonathan "stamp" G](https://www.github.com/stamp) for all the help, coaching and lessons during this project. Without your support this project would never have been a reality.
 
+Required go-via version
+-----------------------
+v0.4.3
 
-# Building the terraform provider
+
+Building the terraform provider
+---------------------------------
 
 Run the following command to build the provider
 
@@ -15,7 +20,8 @@ Run the following command to build the provider
 go build -o terraform-provider-govia
 ```
 
-## Test sample configuration
+Test sample configuration
+-------------------------
 
 First, build and install the provider.
 
