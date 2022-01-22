@@ -6,8 +6,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"mime/multipart"
 	"net/http"
+	"os"
 	"time"
+
+	"github.com/maxiepax/terraform-provider-govia/govia/models"
 )
 
 type Client struct {
@@ -111,7 +116,9 @@ func (c *Client) patch(path string, item interface{}) error {
 	defer r.Body.Close()
 
 	if r.StatusCode != 200 {
-		return fmt.Errorf("govia returned error: %s", r.Status)
+		bodyBytes, _ := io.ReadAll(r.Body)
+		bodyString := string(bodyBytes)
+		return fmt.Errorf("govia returned error: %s : %s", r.Status, bodyString)
 	}
 
 	return nil
@@ -142,4 +149,63 @@ func (c *Client) delete(path string) error {
 	default:
 		return fmt.Errorf("govia returned error: %s", r.Status)
 	}
+}
+
+func (c *Client) postFile(path string, item models.Image, ret interface{}) error {
+
+	file, err := os.Open(item.ISOImage)
+	if err != nil {
+		return err
+	}
+	fileContents, err := ioutil.ReadAll(file)
+	if err != nil {
+		return err
+	}
+	fi, err := file.Stat()
+	if err != nil {
+		return err
+	}
+	file.Close()
+
+	body := new(bytes.Buffer)
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile("file[]", fi.Name())
+	if err != nil {
+		return err
+	}
+	part.Write(fileContents)
+
+	_ = writer.WriteField("hash", item.Hash)
+	_ = writer.WriteField("description", item.Description)
+
+	err = writer.Close()
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/%s", c.url, path), body)
+	if err != nil {
+		return err
+	}
+	req.SetBasicAuth(c.username, c.password)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	r, err := c.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer r.Body.Close()
+
+	if r.StatusCode != 200 {
+		bodyBytes, _ := io.ReadAll(r.Body)
+		bodyString := string(bodyBytes)
+		return fmt.Errorf("govia returned error: %s : %s", r.Status, bodyString)
+	}
+
+	err = json.NewDecoder(r.Body).Decode(ret)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
